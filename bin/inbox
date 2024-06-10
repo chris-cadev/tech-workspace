@@ -1,0 +1,11 @@
+#!/bin/bash
+NOTES_DIRECTORY="~/.main/notes/SNTS"
+
+find "$NOTES_DIRECTORY" \
+-not -path "*/work/*" \
+-not -path "*/gtd*/*" \
+-name "*.md" \
+-print0 \
+| xargs -0 grep -e "- \[ \]" \
+| grep -v '🗑'
+

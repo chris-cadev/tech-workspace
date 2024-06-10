@@ -1,0 +1,6 @@
+.vscode
+bak
+tmp
+.cache
+.logs
+.DS_Store

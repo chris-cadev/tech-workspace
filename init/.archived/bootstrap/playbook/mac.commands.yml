@@ -1,0 +1,26 @@
+---
+- name: Provision Terminal Commands
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Check .dotfiles/bin in the PATH
+      ansible.builtin.shell: |
+        directory="$HOME/.dotfiles/bin"
+        if [[ ":$PATH:" == *":$directory:"* ]]; then
+          echo "Directory is already in PATH"
+        else
+          echo "Directory is NOT in PATH"
+        fi
+      register: dotfiles_bin_check
+
+    - name: Add directory to PATH
+      file:
+        src: ~/.dotfiles/.zshrc
+        dest: ~/.zshrc
+        state: link
+      when: dotfiles_bin_check.stdout == "Directory is NOT in PATH"
+
+    - name: Update PATH
+      command: source ~/.zshrc
+      state:

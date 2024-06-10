@@ -1,0 +1,1 @@
+export PATH="/home/cavila/.turso:$PATH"

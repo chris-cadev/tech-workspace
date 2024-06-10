@@ -1,0 +1,13 @@
+[Unit]
+Description=Play with MPV player
+After=multi-user.target
+[Service]
+User=$(whoami)
+WorkingDirectory=$HOME/.play-with-mpv
+ExecStart=$(which python3) server.py
+Restart=always
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+Environment="PULSE_RUNTIME_PATH=/run/user/1000/pulse"
+Environment=DISPLAY=:0
+[Install]
+WantedBy=multi-user.target

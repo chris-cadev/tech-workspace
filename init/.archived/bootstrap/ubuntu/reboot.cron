@@ -1,0 +1,3 @@
+@reboot root bash ~/.dotfiles/bootstrap/ubuntu/configuration/services.sh >> /var/log/dotfiles-configuration-services.log 2>&1
+@reboot root bash ~/.dotfiles/bootstrap/bin/phone connect >> /var/log/dotfiles-phone-connect.log 2>&1
+

@@ -1,0 +1,8 @@
+{
+  "profile": {
+    "status_text": "<STATUS_MESSAGE>",
+    "status_emoji": "<STATUS_EMOJI>",
+    "status_expiration": "<STATUS_EXPIRATION_SECONDS>"
+  },
+  "presence": "away"
+}

@@ -1,0 +1,12 @@
+install: ansible
+	ansible-playbook ./playbook/mac.terminal.yml
+	ansible-playbook ./playbook/mac.commands.yml
+	ansible-playbook ./playbook/mac.engines.yml
+	ansible-playbook ./playbook/mac.ide.yml
+	ansible-playbook ./playbook/mac.utilities.yml
+	ansible-playbook ./playbook/mac.fonts.yml
+
+ansible:
+	bash ./mac.install.brew.sh
+	brew install ansible
+

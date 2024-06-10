@@ -1,0 +1,66 @@
+#!/bin/bash
+
+set -e
+
+OPEN=0
+LOCK=0
+CONNECT=0
+
+CWD=$(dirname `realpath "$0"`)
+
+
+help() {
+    echo "This script allows you to perform various actions on your phone."
+    echo "Usage: `realpath "$0"` [options]"
+    echo ""
+    echo "Options:"
+    echo "  -o, --open    : Open your phone's lock screen."
+    echo "  -l, --lock    : Lock your phone's screen."
+    echo "  -c, --connect : Connect your phone to a computer."
+    echo "  -h, --help    : Display this help message."
+}
+
+if [ -z "$1" ]; then
+    help
+    exit 1
+fi
+
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    
+    case $key in
+        o|open)
+            OPEN=1
+            shift
+        ;;
+        l|lock)
+            LOCK=1
+            shift
+        ;;
+        c|connect)
+            CONNECT=1
+            shift
+        ;;
+        -h|--help)
+            help
+            break
+        ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+        ;;
+    esac
+done
+
+if [ "$CONNECT" = 1 ]; then
+    bash "$CWD/../scripts/phone/connect.sh"
+fi
+
+if [ "$OPEN" = 1 ]; then
+    nohup sh -c "bash '$CWD/../scripts/phone/open.sh' ; bash '$CWD/../scripts/phone/lock.sh'" > /dev/null 2>&1 &
+fi
+
+if [ "$LOCK" = 1 ]; then
+    bash "$CWD/../scripts/phone/lock.sh"
+fi

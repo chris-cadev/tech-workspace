@@ -1,0 +1,1 @@
+../../../../zsh/nvim-switch.zsh

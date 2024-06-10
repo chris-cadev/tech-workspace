@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  testing_env:
+    build: .
+    volumes:
+      - .:/home/christian/.dotfiles:rw

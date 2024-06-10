@@ -1,0 +1,3 @@
+#/bin/bash -e
+
+VDPAU_DRIVER=va_gl ffmpeg -f avfoundation -framerate 24 -video_size 800x600 -i "default" -pix_fmt yuv420p -f yuv4mpegpipe - | mpv -

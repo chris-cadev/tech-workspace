@@ -1,0 +1,111 @@
+Root: ~/Persist
+
+01 - Personal:
+  01 - Health:
+    01 - Mental Health:
+    02 - Physical Health:
+    03 - Social Health:
+      01 - Relationships:
+      02 - Friends:
+      03 - Family:
+      04 - In-laws:
+  02 - Documents:
+    01 - Legal:
+  03 - Presence:
+    01 - Media:
+      - Ringtones:
+
+02 - Projects:
+  01 - Artist:
+    - Artist Notes
+    - Cine (and Animation)
+    - Photography
+    - Music
+    - Writing
+    - Design
+  02 - Computer Technician:
+    - CT Notes
+      - Drata
+      - Mission 11
+      - Liondesk
+      - Prepaeiffel
+      - Blockchainers
+    - Work (Drata)
+      - Identity
+    - Experimental Endeavors
+    - Lab Setup
+      - Solo Studio
+      - Computer Auto Setup
+  03 - Teacher:
+    - Teacher Notes
+  04 - Profiles:
+    - Christian Camacho (chris_cadev)
+    - Flygames
+    - Programadores Tijuana
+  05 - Chef:
+    - Recipe Book
+  06 - Home:
+    - Construction Directions
+    - Inspiration
+    - Brainstorm Ideas
+  07 - Public Voice:
+    - Safe Place
+    - Blog
+    - Video Channel
+
+03 - Shared:
+  01 - USBs:
+  02 - Alondra:
+  03 - Family:
+    - Manuel
+    - Angel
+  04 - Family in Law:
+    - Liz
+    - Familia de mi ama
+
+98 - Archive:
+
+99 - Files:
+  01 - Lakes:
+    01 - Media:
+      - Canon_EOS_T5i
+      - GoPro7
+      - OnePlus_Camera
+      - OnePlus_Recordings
+      - Screenshots_Linux
+      - Screenshots_Windows
+      - Screenshots_Mac
+      - Screenshots_OnePlus
+    02 - Text:
+    03 - Code:
+    04 - Downloads:
+      - Facebook
+      - Instagram
+      - Windows
+      - Linux
+      - Mac
+      - Messenger
+      - Twitter
+      - WhatsApp
+      - OnePlus
+    05 - Memes:
+      - Favorites
+
+  02 - Oasis:
+    - Media:
+        - Events:
+            - 2023
+            - 2022
+            - N
+        - Memes
+        - Memories
+        - Periods
+
+  03 - Rivers:
+    - cine.yml
+    - mac.yml
+    - notes.yml
+
+  98 - Glacier:
+
+  99 - Ocean:

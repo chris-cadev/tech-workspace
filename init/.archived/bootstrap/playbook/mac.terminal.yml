@@ -1,0 +1,61 @@
+---
+- name: Provision Terminal
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Check if Homebrew is installed
+      stat:
+        path: /opt/homebrew/bin/brew
+      register: homebrew_installed
+
+    - name: Install Homebrew
+      command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: homebrew_installed.stat.exists == false
+
+    - name: Check if Zsh is installed
+      stat:
+        path: /usr/bin/zsh
+      register: zsh_installed
+
+    - name: Install Zsh
+      command: brew install zsh
+      when: zsh_installed.stat.exists == false
+
+    - name: Check if Tmux is installed
+      stat:
+        path: /usr/bin/tmux
+      register: tmux_installed
+
+    - name: Install Tmux
+      command: brew install tmux
+      when: tmux_installed.stat.exists == false
+
+    - name: Check if Oh My Zsh is installed
+      stat:
+        path: ~/.oh-my-zsh
+      register: ohmyzsh_installed
+
+    - name: Check if Oh My Zsh is installed
+      stat:
+        path: ~/.oh-my-zsh
+      register: ohmyzsh_installed
+
+    - name: Download Oh My Zsh install script
+      get_url:
+        url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+        dest: /tmp/install-ohmyzsh.sh
+        mode: "0755"
+      when: ohmyzsh_installed.stat.exists == false
+
+    - name: Execute Oh My Zsh install script
+      command: sh /tmp/install-ohmyzsh.sh
+      args:
+        creates: ~/.oh-my-zsh
+      when: ohmyzsh_installed.stat.exists == false
+
+    - name: Create symbolic link for ~/.config/tmux
+      file:
+        src: ~/.dotfiles/.config/tmux
+        dest: ~/.config/tmux
+        state: link

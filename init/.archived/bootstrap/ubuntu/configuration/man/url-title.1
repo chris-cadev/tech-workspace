@@ -1,0 +1,37 @@
+.TH url-title 1 "March 2023" "url-title man page"
+
+.SH NAME
+url-title \- retrieve the title of a web page
+
+.SH SYNOPSIS
+.B url-title
+[\-\-disable-cache]
+[URL]
+
+.SH DESCRIPTION
+.B url-title
+retrieves the title of a web page by sending an HTTP GET request to the specified URL and parsing the HTML response. The title of the web page is printed to standard output.
+
+.SH OPTIONS
+.TP
+\fB\-\-disable-cache\fP
+Disable caching of web page titles. By default, titles are cached for one week to improve performance.
+
+.SH EXAMPLES
+Retrieve the title of a web page:
+.nf
+$ url-title https://www.google.com/
+Google
+.fi
+
+Disable caching of web page titles:
+.nf
+$ url-title --disable-cache https://www.google.com/
+Google
+.fi
+
+.SH AUTHOR
+Created by [Your Name].
+
+.SH SEE ALSO
+curl(1), pup(1)

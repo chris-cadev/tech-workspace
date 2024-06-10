@@ -1,0 +1,104 @@
+#!/bin/bash
+
+CWD=$(dirname `realpath "$0"`)
+
+# Define the path to the play-with-mpv directory
+WORKING_DIR=$(realpath "$CWD/../scripts/play-with-mpv")
+
+help() {
+    echo "Usage:"
+    echo "  last-played [url|subs|title|play] -- Show last played item or its info."
+    echo "  list-viewed            -- List all viewed items."
+    echo "  --help                 -- Display this help message."
+}
+
+help_last_played() {
+    echo "Usage: last-played [url|subs|title|play]"
+    echo ""
+    echo "Show information about the last played item. Takes one of the following arguments:"
+    echo ""
+    echo "  url    - Show the URL of the last played item"
+    echo "  subs   - Show the subtitle file of the last played item"
+    echo "  title  - Show the title of the last played item"
+    echo "  play   - Start playing the last played item"
+}
+
+
+last_played() {
+    local cmd="$1"
+    shift
+    
+    if [ -z "$1" ]; then
+        echo "no command"
+        help_last_played
+        exit 1
+    fi
+    
+    while [[ $# -gt 0 ]]
+    do
+        case "$1" in
+            url)
+                shift
+                bash "$WORKING_DIR/last-played-url.sh"
+                break
+            ;;
+            subs)
+                shift
+                bash "$WORKING_DIR/last-played-subs.sh" $@
+                break
+            ;;
+            title)
+                shift
+                bash "$WORKING_DIR/last-played-title.sh"
+                break
+            ;;
+            play)
+                shift
+                bash "$WORKING_DIR/last-played-play.sh"
+                break
+            ;;
+            --help)
+                help_last_played
+                exit 0
+            ;;
+            *)
+                echo "Unknown option '$1' for '$cmd'"
+                help_last_played
+                exit 1
+            ;;
+        esac
+    done
+}
+
+if [ -z "$1" ]; then
+    echo "no command"
+    help
+    exit 1
+fi
+
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        lp|last-played)
+            cmd=$1
+            shift
+            last_played "$cmd" $@
+            break
+        ;;
+        lv|list-viewed)
+            cmd=$1
+            shift
+            bash "$WORKING_DIR/list-viewed.sh"
+            break
+        ;;
+        --help)
+            help
+            exit 0
+        ;;
+        *)
+            echo "Unknown option: $1\n"
+            help
+            exit 1
+        ;;
+    esac
+done

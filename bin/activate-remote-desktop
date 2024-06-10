@@ -1,0 +1,12 @@
+#!/bin/bash
+
+CWD=$(dirname `realpath "$0"`)
+
+echo "disable sleep"
+"$CWD/disable-sleep"
+
+ngrok tcp 22
+
+echo "enable sleep"
+"$CWD/enable-sleep"
+# TODO: write a file with the ngrok address and port in the "work pc"

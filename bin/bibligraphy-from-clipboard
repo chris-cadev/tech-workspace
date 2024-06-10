@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+CWD=$(dirname $(realpath "$0"))
+clipboard="$($CWD/clip)"
+
+$CWD/bibliography "$clipboard"

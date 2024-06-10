@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+playwright = "*"
+click = "*"
+furl = "*"
+python-dotenv = "*"
+yt-dlp = "*"
+pyperclip = "*"
+pytest-playwright = "*"
+pyyaml = "*"
+defusedxml = "*"
+
+[dev-packages]
+behave = "*"
+
+[requires]
+python_version = "3.11"

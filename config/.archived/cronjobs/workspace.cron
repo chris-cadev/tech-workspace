@@ -1,0 +1,7 @@
+# monday to friday
+# switch to workspace work at 7 am
+0 7 * * 1-5 switch 2 
+
+# saturday and sunday
+# switch to workspace homelab at 7 am
+0 7 * * 6-7 switch 1

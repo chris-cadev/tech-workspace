@@ -1,0 +1,1 @@
+*/5 * * * * $HOME/.dotfiles/scripts/notes/make-bibliography.sh
