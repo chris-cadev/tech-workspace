@@ -1,0 +1,1 @@
+export PATH="$HOME/projects/tech-workspace/bin:$PATH"
