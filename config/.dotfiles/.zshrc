@@ -1,7 +1,7 @@
 # < oh-my-zsh
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
-plugins=()
+plugins=(git fzf-zsh-plugin)
 source $ZSH/oh-my-zsh.sh
 eval "$(/opt/homebrew/bin/brew shellenv)"
 # oh-my-zsh >
