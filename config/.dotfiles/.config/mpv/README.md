@@ -1,0 +1,17 @@
+- [ ] make a http request from lua
+- [ ] create a service that receive the url
+- [ ] create jobs to download the video
+- [ ] download the description
+- [ ] download the comments
+- [ ] generate subtitles
+- [ ] generate tags
+- [ ] crete markdown sheet
+  - [ ] relate description, comments and subtitles
+  - [ ] create a good template
+- [ ] easy to know the status
+- [ ] view history
+- [ ] remote archive
+- [ ] remote backup
+- [ ] elastic search
+- [ ] omnisearch
+- [ ]

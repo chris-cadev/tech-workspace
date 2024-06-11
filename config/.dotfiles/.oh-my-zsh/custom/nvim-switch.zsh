@@ -10,7 +10,7 @@ alias nvw="nvim-write"
 alias nv="nvim-deprecated"
 
 function nvims() {
-  items=$(ls -d $HOME/.config/*/ | grep -iE ".+vim.+" | xargs basename)
+  items=$(ls -d $HOME/.config/nvims/*/ | grep -iE ".+vim.+" | xargs basename)
 
   config=$(printf "%s\n" "${items[@]}" | fzf --prompt="Neovim Config: " --height=~50% --layout=reverse --border --exit-0)
   if [[ -z $config ]]; then
