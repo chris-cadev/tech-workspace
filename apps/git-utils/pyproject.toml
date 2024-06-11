@@ -1,0 +1,24 @@
+[project]
+name = "git-utils"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Christian Camacho", email = "chris.ca.dev@gmail.com"},
+]
+dependencies = [
+    "click>=8.1.7",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[project.scripts]
+git-fileage = "git_utils.git_fileage:calculate_file_age"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
