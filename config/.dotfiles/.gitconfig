@@ -28,6 +28,6 @@
 [rerere]
 	enabled = true
 
-[includeIf "gitdir: ~/projects/drata"]
+[includeIf "gitdir:~/projects/drata/"]
   path = ~/projects/tech-workspace/config/.dotfiles/work/drata/.gitconfig
 
