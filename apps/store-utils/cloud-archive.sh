@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 command -v bw >/dev/null 2>&1 || { echo >&2 "Bitwarden CLI (bw) is required but not installed. Aborting."; exit 1; }
 command -v gpg >/dev/null 2>&1 || { echo >&2 "gpg is required but not installed. Aborting."; exit 1; }

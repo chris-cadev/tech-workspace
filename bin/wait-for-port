@@ -1,1 +1,1 @@
-../scripts/wait-for-port.sh
+../apps/common-utils/wait-for-port.sh

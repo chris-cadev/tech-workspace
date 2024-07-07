@@ -3,6 +3,7 @@
 set -e
 CWD=$(dirname $(realpath "$0"))
 WD="$CWD"
+LOG_COMMAND="$CWD/../common-utils/log.sh"
 
 persisted_log_file_path="$CWD/.tmp_log_file"
 if [[ -f $persisted_log_file_path ]]; then
@@ -26,13 +27,13 @@ done
 
 search=$(printf %s "$search" | jq -s -R -r @uri)
 
-echo "searching for '$search'..." | "$CWD/../log.sh" "flow-state.start"
-echo "https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=$search&type=video" | "$CWD/../log.sh" "flow-state.start"
+echo "searching for '$search'..." | "$LOG_COMMAND" "flow-state.start"
+echo "https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=$search&type=video" | "$LOG_COMMAND" "flow-state.start"
 
 video_id="$(curl --silent "https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=$search&type=video&key=$GOOGLE_API_KEY_YOUTUBE_SEARCH" | jq -r '.items[0].id.videoId')"
 video_url="https://www.youtube.com/watch?v=$video_id"
 
-echo "'$video_url' about to play..." | "$CWD/../log.sh" "flow-state.start"
+echo "'$video_url' about to play..." | "$LOG_COMMAND" "flow-state.start"
 echo "$search:::$video_url" >> "$WD/.prev"
 
 temp_log_file=$(mktemp)
@@ -42,6 +43,6 @@ mpv_pid=$!
 echo "$mpv_pid" > "$CWD/.last-pid"
 tail -f "$temp_log_file" | while read line; do
     if ! [[ "$line" =~ (AV|A):\ [0-9]{2}:[0-9]{2}:[0-9]{2}\ \/ ]]; then
-        "$CWD/../log.sh" "flow-state.start" "$line"
+        "$LOG_COMMAND" "flow-state.start" "$line"
     fi
 done &
