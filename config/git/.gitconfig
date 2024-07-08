@@ -1,5 +1,5 @@
 [user]
-	name = Christian Camacho
+  name = Christian Camacho
   email = chris.ca.dev@gmail.com
 [init]
   defailtBranch = main
@@ -14,9 +14,9 @@
   ssh-to-https = "!f() { git remote get-url \"${1:-origin}\" | sed -e 's|git@\\(.*\\):|https://\\1/|' -e 's|\\.git$||'; }; f"
   commiturl = "!f() { ref=${1:-HEAD}; remote=${2:-origin}; remote_url=$(git ssh-to-https); last_commit=$(git lastcommit $ref); echo \"$remote_url/commit/$last_commit\"; }; f"
 
-	push-please = push --force-with-lease
-	pp = push --force-with-lease
-	ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
+  push-please = push --force-with-lease
+  pp = push --force-with-lease
+  ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
   fileage = "!f() { git_repo=${2:-$(pwd)}; git-fileage \"$1\" --repo-path \"$git_repo\"; }; f"
 [core]
   editor = nvim
@@ -29,4 +29,4 @@
 	enabled = true
 
 [includeIf "gitdir:~/projects/drata/"]
-  path = ~/projects/tech-workspace/config/work/drata/.gitconfig
+  path = ~/projects/tech-workspace/config/git/drata/.gitconfig
