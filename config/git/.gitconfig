@@ -7,13 +7,14 @@
   lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
   lg = lg1
+  mylog = "!f() { git log --all --author=\"${1:-$(git config user.email)}\" --date-order; }; f"
+  myl = mylog
   difns = diff --name-status
   cb = rev-parse --abbrev-ref HEAD
   lastcommit = "!f() { ref=${1:-HEAD}; git log --oneline -n 1 $ref | cat | awk '{print $1}'; }; f"
   lc = lastcommit
   ssh-to-https = "!f() { git remote get-url \"${1:-origin}\" | sed -e 's|git@\\(.*\\):|https://\\1/|' -e 's|\\.git$||'; }; f"
   commiturl = "!f() { ref=${1:-HEAD}; remote=${2:-origin}; remote_url=$(git ssh-to-https); last_commit=$(git lastcommit $ref); echo \"$remote_url/commit/$last_commit\"; }; f"
-
   push-please = push --force-with-lease
   pp = push --force-with-lease
   ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
