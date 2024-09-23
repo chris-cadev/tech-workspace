@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cwd=$(dirname `realpath "$0"`)
+CWD=$(dirname $(realpath "$0"))
 
-"$cwd/../scripts/sleep-mode.sh" "enable"
+"$CWD/../apps/common-utils/sleep-mode.sh" "enable"
