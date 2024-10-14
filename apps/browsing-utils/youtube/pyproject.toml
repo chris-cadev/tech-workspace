@@ -16,7 +16,7 @@ readme = "README.md"
 license = {text = "MIT"}
 
 [project.scripts]
-extract-subscriptions = "youtube.extract_subscriptions:main"
+yt-extract-subs = "youtube.extract:extract_subs"
 
 [build-system]
 requires = ["pdm-backend"]

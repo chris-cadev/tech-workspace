@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -17,7 +18,7 @@ def extract_subs():
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "src/youtube/client_secret_932420356666-ji0eg9dbakh8u50jf3n8rpc5onjjcmga.apps.googleusercontent.com.json"
+    client_secrets_file = os.environ["GOOGLE_CREDENTIALS_FILE"]
 
     # Get credentials and create an API client
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
@@ -49,13 +50,14 @@ def extract_subs():
             break  # Exit the loop if there are no more pages
 
     # Print the list of subscriptions (channels)
-    print(f"Total Subscriptions: {len(subscriptions)}")
+    # print(f"Total Subscriptions: {len(subscriptions)}")
     for item in subscriptions:
         channel_title = item["snippet"]["title"]
         channel_id = item["snippet"]["resourceId"]["channelId"]
-        print(f"Channel Title: {channel_title}, Channel ID: {channel_id}")
-
-    print(response)
+        # print(f"Channel Title: {channel_title}, Channel ID: {channel_id}")
+    
+    with open('results.json', 'w') as f:
+        f.write(json.dumps(subscriptions))
 
 
 if __name__ == "__main__":
