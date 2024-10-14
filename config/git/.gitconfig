@@ -23,8 +23,10 @@
   rrh = remote-reset-hard
   reference-log-cat = "!f() { git reflog ${1:-$(git cb)} | cat; }; f"
   rlc = reference-log-cat
+  rebase-sync-daemon = "!f() { base_remote=${3:-origin}; base_branch=${2:-release}; target_branch=${1:-$(git cb)}; while true; do git fetch $base_remote $base_branch && git rebase $base_remote/$base_branch && git push $base_remote $target_branch -f || exit 0; sleep 60; done }; f"
+  merge-sync-daemon = "!f() { base_remote=${3:-origin}; base_branch=${2:-release}; target_branch=${1:-$(git cb)}; while true; do git fetch $base_remote $base_branch && git merge $base_remote/$base_branch && git push $base_remote $target_branch || exit 0; sleep 60; done }; f"
 [core]
-  editor = vim
+	editor = vim
 	ignorecase = false
 [submodule]
 	recurse = false
