@@ -1,27 +1,29 @@
 [project]
-name = "youtube"
-version = "0.1.0"
-description = "set of youtube browsing scripts"
 authors = [
-    {name = "Christian Camacho", email = "chris.ca.dev@gmail.com"},
+  {name = "Christian Camacho", email = "chris.ca.dev@gmail.com"},
 ]
 dependencies = [
-    "click>=8.1.7",
-    "google-api-python-client>=2.147.0",
-    "google-auth-oauthlib>=1.2.1",
-    "google-auth-httplib2>=0.2.0",
+  "click>=8.1.7",
+  "google-api-python-client>=2.147.0",
+  "google-auth-oauthlib>=1.2.1",
+  "google-auth-httplib2>=0.2.0",
+  "flask>=3.0.3",
+  "pysolr>=3.10.0",
 ]
-requires-python = ">=3.12"
-readme = "README.md"
+description = "set of youtube browsing scripts"
 license = {text = "MIT"}
+name = "youtube"
+readme = "README.md"
+requires-python = ">=3.12"
+version = "0.1.0"
 
 [project.scripts]
+server = "youtube.server:main"
 yt-extract-subs = "youtube.extract:extract_subs"
 
 [build-system]
-requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
+requires = ["pdm-backend"]
 
 [tool.pdm]
 distribution = true

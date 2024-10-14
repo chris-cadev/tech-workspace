@@ -1,63 +1,96 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+from dotenv import load_dotenv
+import pysolr
+
+load_dotenv()
 
 scopes = [
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "openid",
 ]
+
+# Configure the Solr endpoint
+# Example: "http://localhost:8983/solr/youtube_subscriptions"
+SOLR_URL = os.environ["SOLR_URL"]
 
 
 def extract_subs():
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
     api_service_name = "youtube"
     api_version = "v3"
     client_secrets_file = os.environ["GOOGLE_CREDENTIALS_FILE"]
 
-    # Get credentials and create an API client
+    # Initialize OAuth flow to authenticate the user
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes)
+        client_secrets_file, scopes=scopes
+    )
     credentials = flow.run_local_server()
-    youtube_api = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
 
-    # Initialize variables for pagination
+    # Build the YouTube and OAuth2 API clients
+    youtube_api = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials
+    )
+    oauth2_api = googleapiclient.discovery.build(
+        'oauth2', 'v2', credentials=credentials)
+
+    # Get the user's email
+    user_info = oauth2_api.userinfo().get().execute()
+    source_user_email = user_info["email"]
+
+    # Get the authenticated user's channel ID and title
+    channel_response = youtube_api.channels().list(
+        part="snippet",
+        mine=True
+    ).execute()
+
+    source_channel_id = channel_response["items"][0]["id"] if channel_response.get(
+        "items", None) else None
+    source_channel_title = channel_response["items"][0]["snippet"]["title"] if channel_response.get(
+        "items", None) else None
+
+    # Initialize the Solr client
+    solr = pysolr.Solr(SOLR_URL, always_commit=True)
+
+    # Fetch all subscriptions
     subscriptions = []
     next_page_token = None
 
     while True:
-        # Make the API request to get the subscriptions of the logged-in user
         request = youtube_api.subscriptions().list(
             part="snippet",
             mine=True,
             maxResults=50,
-            pageToken=next_page_token  # Use the nextPageToken for pagination
+            pageToken=next_page_token
         )
         response = request.execute()
-
-        # Add the subscriptions to the list
         subscriptions.extend(response["items"])
 
-        # Check if there is a nextPageToken to continue
         next_page_token = response.get("nextPageToken")
         if not next_page_token:
-            break  # Exit the loop if there are no more pages
+            break
 
-    # Print the list of subscriptions (channels)
-    # print(f"Total Subscriptions: {len(subscriptions)}")
+    # Prepare and send data to Solr
+    solr_data = []
     for item in subscriptions:
-        channel_title = item["snippet"]["title"]
-        channel_id = item["snippet"]["resourceId"]["channelId"]
-        # print(f"Channel Title: {channel_title}, Channel ID: {channel_id}")
-    
-    with open('results.json', 'w') as f:
-        f.write(json.dumps(subscriptions))
+        snippet = item["snippet"]
+        solr_data.append({
+            "id": snippet["resourceId"]["channelId"],  # Unique ID in Solr
+            "sourceUserEmail": source_user_email,
+            "sourceChannelId": source_channel_id,
+            "sourceChannelTitle": source_channel_title,
+            "channelId": snippet["resourceId"]["channelId"],
+            "title": snippet["title"],
+            "publishedAt": snippet["publishedAt"],
+            "description": snippet["description"],
+            "thumbnail": snippet["thumbnails"]["high"]["url"],
+        })
+
+    # Send all data to Solr
+    solr.add(solr_data)
 
 
 if __name__ == "__main__":

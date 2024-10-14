@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full-Text Search</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 60%;
+        margin-left: 20%;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      ul {
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      li {
+        display: flex;
+        gap: 24px;
+      }
+      li img {
+        width: 196px;
+      }
+      article {
+        width: calc(100% - 196px - 24px);
+      }
+      article section {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+      h3 {
+        margin: 0;
+        padding: 8px;
+      }
+      article section span {
+        border-radius: 100em;
+        padding: 8px;
+        box-shadow: 0px 4px 6px rgba(50, 50, 93, 0.11),
+          0px 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      header {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: white; /* Ensure it has a background */
+        padding: 16px; /* Add padding to the header */
+      }
+      .pagination {
+        bottom: 0;
+        background-color: white;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .pagination button {
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Search in subscriptions</h1>
+      <form method="POST" action="/">
+        <input
+          type="text"
+          name="query"
+          placeholder="Enter search term"
+          required
+          value="{{ query }}"
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div class="pagination">
+        {% if current_page > 1 %}
+        <form method="POST" action="/" style="display: inline">
+          <input type="hidden" name="query" value="{{ query }}" />
+          <input type="hidden" name="page" value="{{ current_page - 1 }}" />
+          <button type="submit">Previous</button>
+        </form>
+        {% else %}
+        <button disabled>Previous</button>
+        {% endif %}
+        <!-- Page numbers -->
+        {% for page_num in range(1, total_pages + 1) %} {% if page_num ==
+        current_page %}
+        <strong>{{ page_num }}</strong>
+        {% else %}
+        <form method="POST" action="/" style="display: inline">
+          <input type="hidden" name="query" value="{{ query }}" />
+          <input type="hidden" name="page" value="{{ page_num }}" />
+          <button type="submit">{{ page_num }}</button>
+        </form>
+        {% endif %} {% endfor %} {% if current_page < total_pages %}
+        <form method="POST" action="/" style="display: inline">
+          <input type="hidden" name="query" value="{{ query }}" />
+          <input type="hidden" name="page" value="{{ current_page + 1 }}" />
+          <button type="submit">Next</button>
+        </form>
+        {% else %}
+        <button disabled>Next</button>
+        {% endif %}
+      </div>
+    </header>
+
+    <ul>
+      {% if results %} {% for result in results %}
+      <li>
+        <a
+          href="https://www.youtube.com/channel/{{ result['id'] }}"
+          width="480"
+          height="400"
+          title="{{ result['title'] }}"
+          target="_blank"
+        >
+          <img src="{{ result['thumbnail'] }}" alt="{{ result['title'] }}" />
+        </a>
+        <article>
+          <h2>{{ result['title'] }}</h2>
+          <p>{{ result['description'] }}</p>
+          <hr />
+          <section>
+            <h3>Source:</h3>
+            <span>{{ result['sourceChannelTitle'] }}</span>
+            <span>{{ result['sourceUserEmail'] }}</span>
+          </section>
+        </article>
+      </li>
+      {% endfor %} {% else %}
+      <p>No results found.</p>
+      {% endif %}
+    </ul>
+  </body>
+</html>
