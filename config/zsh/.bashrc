@@ -5,3 +5,4 @@ export PATH="/Users/ccamacho/.rd/bin:$PATH"
 
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+. "/Users/ccamacho/.deno/env"
