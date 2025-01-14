@@ -4,6 +4,7 @@ set -euo pipefail
 ###############################################################################
 # This script downloads a video from a YouTube channel (via yt-dlp), filters
 # by date/title if requested, caches the downloaded file, and plays it with mpv.
+# Optionally, it can stream via a direct URL to mpv (preserving position).
 ###############################################################################
 
 ###############################################################################
@@ -17,7 +18,9 @@ CHANNEL_URL=""
 TITLE_KEYWORD=""
 MAX_DOWNLOADS="1"
 DATE_AFTER=""
+STREAM_MODE="false"
 
+# Default DATE_AFTER of "1 day ago" for macOS (Darwin) vs Linux
 if [[ "$(uname)" == "Darwin" ]]; then
   DATE_AFTER="$(date -v -1d +%Y%m%d)"
 else
@@ -46,20 +49,30 @@ Usage:
   $(basename "$0") <channel URL> [OPTIONS]
 
 Required:
-  <channel URL>             URL of the YouTube channel 
+  <channel URL>             URL of the YouTube channel
                             (e.g., https://www.youtube.com/@nprmusic)
 
 Options:
   --title <keyword>         Filter videos by title keyword (default: no filter)
-  --max-downloads <number>  Maximum number of videos to download (default: 1)
+  --max-downloads <number>  Maximum number of videos to download or stream
+                            (default: 1)
   --date-after <YYYYMMDD>   Only include videos uploaded after this date
                             (default: 1 day ago)
+  --stream                  Stream directly using the video's URL.
+                            (Preserves watch-later position in mpv,
+                             but bypasses local caching.)
 
-Example:
+Examples:
+  # Download & play the first Tiny Desk Concert posted after 2025-01-01
   $(basename "$0") "https://www.youtube.com/@nprmusic" \\
     --title "Tiny Desk Concert" \\
     --max-downloads 1 \\
     --date-after 20250101
+
+  # Stream (no caching), with watch-later position
+  $(basename "$0") "https://www.youtube.com/@nprmusic" \\
+    --title "Tiny Desk Concert" \\
+    --stream
 EOF
   exit 1
 }
@@ -93,6 +106,10 @@ parse_args() {
         DATE_AFTER="$2"
         shift 2
         ;;
+      --stream)
+        STREAM_MODE="true"
+        shift
+        ;;
       *)
         error "Unknown option: $1"
         usage
@@ -102,7 +119,7 @@ parse_args() {
 }
 
 ###############################################################################
-# BUILD YT-DLP COMMAND
+# BUILD YT-DLP COMMAND (DOWNLOAD MODE)
 ###############################################################################
 build_yt_dlp_command() {
   local output_template="$1"
@@ -113,6 +130,26 @@ build_yt_dlp_command() {
   cmd+=" --max-downloads '$MAX_DOWNLOADS'"
   cmd+=" --restrict-filenames"
   cmd+=" -o '$output_template'"
+  cmd+=" '$CHANNEL_URL'"
+
+  if [[ -n "$TITLE_KEYWORD" ]]; then
+    cmd+=" --match-title '$TITLE_KEYWORD'"
+  fi
+
+  echo "$cmd"
+}
+
+###############################################################################
+# BUILD YT-DLP COMMAND (STREAM MODE: GET URL)
+###############################################################################
+build_yt_dlp_stream_url_command() {
+  local cmd="yt-dlp"
+  cmd+=" --dateafter '$DATE_AFTER'"
+  cmd+=" --lazy-playlist"
+  cmd+=" --break-on-reject"
+  cmd+=" --max-downloads '$MAX_DOWNLOADS'"
+  cmd+=" --restrict-filenames"
+  cmd+=" --get-url"
   cmd+=" '$CHANNEL_URL'"
 
   if [[ -n "$TITLE_KEYWORD" ]]; then
@@ -165,9 +202,6 @@ download_or_skip_video() {
   fi
 }
 
-
-
-
 ###############################################################################
 # PLAY VIDEO WITH MPV
 ###############################################################################
@@ -192,19 +226,60 @@ main() {
   mkdir -p "${CACHE_FOLDER}"
   mkdir -p "$(dirname "$LOG_FILE")"
 
-  local video_file
-  if ! video_file="$(download_or_skip_video)"; then
-    error "Failed to acquire a video file."
-    exit 1
-  fi
+  if [[ "$STREAM_MODE" == "true" ]]; then
+    ###########################################################################
+    # STREAM MODE
+    ###########################################################################
+    # 1) Build a command that fetches the direct media URL (not the media bytes)
+    local stream_cmd
+    stream_cmd="$(build_yt_dlp_stream_url_command)"
+    log "Streaming from channel: $CHANNEL_URL"
+    log "Command (get-url): $stream_cmd"
 
-  log "Video file ready: $video_file"
-  if ! play_video "$video_file"; then
-    error "Playback failed."
-    exit 1
-  fi
+    # 2) Run the command and pick the first URL in case multiple lines are returned
+    #    (You could handle multiple URLs differently if you wish.)
+    local stream_urls
+    stream_urls="$(bash -c "$stream_cmd" 2>>/dev/null || true)"
+    local video_stream_url="$(echo "$stream_urls" | sed -n '1p')"
+    local audio_stream_url="$(echo "$stream_urls" | sed -n '2p')"
 
-  log "Playback finished successfully."
+    if [[ -z "$stream_urls" ]]; then
+      error "No valid stream URL found (yt-dlp returned nothing)."
+      exit 1
+    fi
+
+    log "Got stream URLs"
+    log "Video URL: $video_stream_url"
+    log "Audio URL: $audio_stream_url"
+
+    # 3) Pass that URL to mpv.
+    #    mpv sees a "real" URL and can remember watch-later progress.
+    if ! mpv --save-position-on-quit --audio-file="$audio_stream_url" "$video_stream_url"; then
+      error "Streaming with mpv failed."
+      exit 1
+    fi
+
+    log "Streaming finished successfully."
+    exit 0
+
+  else
+    ###########################################################################
+    # DOWNLOAD & CACHE MODE (ORIGINAL LOGIC)
+    ###########################################################################
+    local video_file
+    if ! video_file="$(download_or_skip_video)"; then
+      error "Failed to acquire a video file."
+      exit 1
+    fi
+
+    log "Video file ready: $video_file"
+    if ! play_video "$video_file"; then
+      error "Playback failed."
+      exit 1
+    fi
+
+    log "Playback finished successfully."
+  fi
 }
 
 main "$@"
