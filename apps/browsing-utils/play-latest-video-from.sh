@@ -1,102 +1,211 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Default values for optional arguments
+###############################################################################
+# This script downloads a video from a YouTube channel (via yt-dlp), filters
+# by date/title if requested, caches the downloaded file, and plays it with mpv.
+###############################################################################
+
+###############################################################################
+# GLOBALS & DEFAULTS
+###############################################################################
+CWD="$(dirname "$(realpath "$0")")"
+CACHE_FOLDER="$CWD/../.cache/$(basename "$0")"
+LOG_FILE="$CWD/../.logs/$(basename "$0").log"
+
+CHANNEL_URL=""
 TITLE_KEYWORD=""
-MAX_DOWNLOADS=1
+MAX_DOWNLOADS="1"
+DATE_AFTER=""
+
 if [[ "$(uname)" == "Darwin" ]]; then
-    # macOS/BSD systems
-    DATE_AFTER=$(date -v -1d +%Y%m%d)
+  DATE_AFTER="$(date -v -1d +%Y%m%d)"
 else
-    # Linux systems
-    DATE_AFTER=$(date -d '1 day ago' +%Y%m%d)
+  DATE_AFTER="$(date -d '1 day ago' +%Y%m%d)"
 fi
 
-# Log function for better output formatting
+###############################################################################
+# LOGGING
+###############################################################################
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+  local message="$1"
+  echo "[INFO  $(date '+%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
 }
 
-# Function to display usage instructions
+error() {
+  local message="$1"
+  echo "[ERROR $(date '+%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+}
+
+###############################################################################
+# USAGE
+###############################################################################
 usage() {
-    cat << EOF
-Usage: $0 <channel URL> [OPTIONS]
+  cat <<EOF
+Usage:
+  $(basename "$0") <channel URL> [OPTIONS]
 
 Required:
-  <channel URL>           URL of the YouTube channel (e.g., https://www.youtube.com/@nprmusic)
+  <channel URL>             URL of the YouTube channel 
+                            (e.g., https://www.youtube.com/@nprmusic)
 
 Options:
-  --title <keyword>       Filter videos by title keyword (default: no filter)
-  --max-downloads <num>   Maximum number of videos to download (default: 1)
-  --date-after <YYYYMMDD> Only include videos uploaded after this date (default: 1 day ago)
+  --title <keyword>         Filter videos by title keyword (default: no filter)
+  --max-downloads <number>  Maximum number of videos to download (default: 1)
+  --date-after <YYYYMMDD>   Only include videos uploaded after this date
+                            (default: 1 day ago)
 
 Example:
-  $0 "https://www.youtube.com/@nprmusic" --title "Tiny Desk Concert" --max-downloads 1 --date-after 20240101
+  $(basename "$0") "https://www.youtube.com/@nprmusic" \\
+    --title "Tiny Desk Concert" \\
+    --max-downloads 1 \\
+    --date-after 20250101
 EOF
-    exit 1
+  exit 1
 }
 
-# Ensure at least the channel URL is provided
-if [ "$#" -lt 1 ]; then
+###############################################################################
+# ARGUMENT PARSING
+###############################################################################
+parse_args() {
+  if [[ $# -lt 1 ]]; then
     usage
-fi
+  fi
 
-# Assign the required parameter
-CHANNEL_URL="$1"
-shift
+  CHANNEL_URL="$1"
+  shift
 
-# Parse optional flags
-while [[ "$#" -gt 0 ]]; do
+  while [[ $# -gt 0 ]]; do
     case "$1" in
-        --title)
-            if [ -z "$2" ]; then
-                log "Error: --title flag requires a keyword."
-                usage
-            fi
-            TITLE_KEYWORD="$2"
-            shift 2
-            ;;
-        --max-downloads)
-            if ! [[ "$2" =~ ^[0-9]+$ ]]; then
-                log "Error: --max-downloads flag requires a valid number."
-                usage
-            fi
-            MAX_DOWNLOADS="$2"
-            shift 2
-            ;;
-        --date-after)
-            if ! [[ "$2" =~ ^[0-9]{8}$ ]]; then
-                log "Error: --date-after flag requires a date in YYYYMMDD format."
-                usage
-            fi
-            DATE_AFTER="$2"
-            shift 2
-            ;;
-        *)
-            log "Error: Unknown option '$1'."
-            usage
-            ;;
+      --title)
+        [[ -z "${2:-}" ]] && { error "Missing keyword after --title."; usage; }
+        TITLE_KEYWORD="$2"
+        shift 2
+        ;;
+      --max-downloads)
+        [[ -z "${2:-}" ]] && { error "Missing integer after --max-downloads."; usage; }
+        [[ ! "${2:-}" =~ ^[0-9]+$ ]] && { error "Invalid integer for --max-downloads: '$2'"; usage; }
+        MAX_DOWNLOADS="$2"
+        shift 2
+        ;;
+      --date-after)
+        [[ ! "${2:-}" =~ ^[0-9]{8}$ ]] && { error "Invalid date format for --date-after. Expected YYYYMMDD."; usage; }
+        DATE_AFTER="$2"
+        shift 2
+        ;;
+      *)
+        error "Unknown option: $1"
+        usage
+        ;;
     esac
-done
-
-# Build the base yt-dlp command
-CMD="yt-dlp --dateafter $DATE_AFTER --lazy-playlist --break-on-reject --max-downloads \"$MAX_DOWNLOADS\" -o - \"$CHANNEL_URL\""
-
-# Add the --match-title option if TITLE_KEYWORD is provided
-if [ -n "$TITLE_KEYWORD" ]; then
-    CMD+=" --match-title \"$TITLE_KEYWORD\""
-fi
-
-# Log and run the command
-log "Running yt-dlp with the following parameters:"
-log "  Channel URL   : $CHANNEL_URL"
-log "  Title keyword : ${TITLE_KEYWORD:-<none>}"
-log "  Max downloads : $MAX_DOWNLOADS"
-log "  Date after    : $DATE_AFTER"
-
-log "Executing command: $CMD"
-eval $CMD | mpv - || {
-    log "Error: Failed to execute yt-dlp or mpv."
-    exit 1
+  done
 }
 
-log "Playback finished successfully."
+###############################################################################
+# BUILD YT-DLP COMMAND
+###############################################################################
+build_yt_dlp_command() {
+  local output_template="$1"
+  local cmd="yt-dlp"
+  cmd+=" --dateafter '$DATE_AFTER'"
+  cmd+=" --lazy-playlist"
+  cmd+=" --break-on-reject"
+  cmd+=" --max-downloads '$MAX_DOWNLOADS'"
+  cmd+=" --restrict-filenames"
+  cmd+=" -o '$output_template'"
+  cmd+=" '$CHANNEL_URL'"
+
+  if [[ -n "$TITLE_KEYWORD" ]]; then
+    cmd+=" --match-title '$TITLE_KEYWORD'"
+  fi
+
+  echo "$cmd"
+}
+
+###############################################################################
+# DOWNLOAD OR SKIP (CACHE CHECK)
+###############################################################################
+download_or_skip_video() {
+  local output_template="${CACHE_FOLDER}/%(upload_date)s.%(title).80B.%(uploader)s.[%(id)s].%(ext)s"
+  local cmd
+  cmd="$(build_yt_dlp_command "$output_template")"
+
+  log "Downloading from channel: $CHANNEL_URL"
+  log "Command: $cmd"
+
+  # Track what files exist before running yt-dlp.
+  local before_dl
+  before_dl="$(ls -1A "$CACHE_FOLDER" 2>/dev/null || true)"
+
+  # Run yt-dlp, log output to file
+  if ! bash -c "$cmd" >> "$LOG_FILE" 2>&1; then
+    log "yt-dlp returned non-zero; continuing to check if files were created anyway."
+  fi
+
+  # Compare file list after download
+  local after_dl
+  after_dl="$(ls -1A "$CACHE_FOLDER" 2>/dev/null || true)"
+
+  # Figure out which file(s) are new by comparing "before" and "after"
+  local new_file
+  new_file="$(diff <(echo "$before_dl") <(echo "$after_dl") | grep '^> ' | awk '{print $2}' | head -n1 || true)"
+
+  if [[ -z "$new_file" ]]; then
+    error "No new file found after yt-dlp run. Possibly already in cache."
+    # If you want to handle "already in cache" differently, do so here.
+    # Return 1 if you consider it an error, or 0 if that's acceptable.
+    return 1
+  fi
+
+  local downloaded_file="${CACHE_FOLDER}/${new_file}"
+  if [[ ! -f "$downloaded_file" ]]; then
+    error "File not found after download attempt: $downloaded_file"
+    return 1
+  fi
+
+  log "Downloaded (or reused) file: $downloaded_file"
+  echo "$downloaded_file"
+  return 0
+}
+
+
+###############################################################################
+# PLAY VIDEO WITH MPV
+###############################################################################
+play_video() {
+  local video_file="$1"
+  if [[ ! -f "$video_file" ]]; then
+    error "Cannot play. File not found: $video_file"
+    return 1
+  fi
+  log "Playing video: $video_file"
+  if ! mpv --save-position-on-quit "$video_file"; then
+    error "Failed to play video with mpv."
+    return 1
+  fi
+}
+
+###############################################################################
+# MAIN
+###############################################################################
+main() {
+  parse_args "$@"
+  mkdir -p "${CACHE_FOLDER}"
+  mkdir -p "$(dirname "$LOG_FILE")"
+
+  local video_file
+  if ! video_file="$(download_or_skip_video)"; then
+    error "Failed to acquire a video file."
+    exit 1
+  fi
+
+  log "Video file ready: $video_file"
+  if ! play_video "$video_file"; then
+    error "Playback failed."
+    exit 1
+  fi
+
+  log "Playback finished successfully."
+}
+
+main "$@"

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Usage:
+#   ./generic-play-latest.sh <youtube-channel-url> [any other arguments...]
+#
+# Examples:
+#   ./generic-play-latest.sh https://www.youtube.com/@nprmusic --title "tiny desk concert"
+#   ./generic-play-latest.sh https://www.youtube.com/@MrSuicideSheep
+#   ./generic-play-latest.sh https://www.youtube.com/@kexp
+
+CWD="$(dirname "$(realpath "$0")")"
+
+# Compute DATE_AFTER differently on macOS vs. Linux
+if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS/BSD systems
+    DATE_AFTER=$(date -v -1w +%Y%m%d)
+else
+    # Linux systems
+    DATE_AFTER=$(date -d '1 week ago' +%Y%m%d)
+fi
+
+# Pass all given arguments ($@) to play-latest-video-from,
+# plus our automatically computed --date-after
+"$CWD/play-latest-video-from" "$@" --date-after "$DATE_AFTER"
