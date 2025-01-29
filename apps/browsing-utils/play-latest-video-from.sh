@@ -20,13 +20,6 @@ MAX_DOWNLOADS="1"
 DATE_AFTER=""
 STREAM_MODE="false"
 
-# Default DATE_AFTER of "1 day ago" for macOS (Darwin) vs Linux
-if [[ "$(uname)" == "Darwin" ]]; then
-  DATE_AFTER="$(date -v -1d +%Y%m%d)"
-else
-  DATE_AFTER="$(date -d '1 day ago' +%Y%m%d)"
-fi
-
 ###############################################################################
 # LOGGING
 ###############################################################################
@@ -57,7 +50,6 @@ Options:
   --max-downloads <number>  Maximum number of videos to download or stream
                             (default: 1)
   --date-after <YYYYMMDD>   Only include videos uploaded after this date
-                            (default: 1 day ago)
   --stream                  Stream directly using the video's URL.
                             (Preserves watch-later position in mpv,
                              but bypasses local caching.)
@@ -124,17 +116,18 @@ parse_args() {
 build_yt_dlp_command() {
   local output_template="$1"
   local cmd="yt-dlp"
-  cmd+=" --dateafter '$DATE_AFTER'"
   cmd+=" --lazy-playlist"
   cmd+=" --break-on-reject"
   cmd+=" --max-downloads '$MAX_DOWNLOADS'"
   cmd+=" --restrict-filenames"
-  cmd+=" -o '$output_template'"
-  cmd+=" '$CHANNEL_URL'"
-
+  if [[ -n "${DATE_AFTER:-}" ]]; then
+    cmd+=" --dateafter '$DATE_AFTER'"
+  fi
   if [[ -n "$TITLE_KEYWORD" ]]; then
     cmd+=" --match-title '$TITLE_KEYWORD'"
   fi
+  cmd+=" -o '$output_template'"
+  cmd+=" '$CHANNEL_URL'"
 
   echo "$cmd"
 }
@@ -144,17 +137,18 @@ build_yt_dlp_command() {
 ###############################################################################
 build_yt_dlp_stream_url_command() {
   local cmd="yt-dlp"
-  cmd+=" --dateafter '$DATE_AFTER'"
   cmd+=" --lazy-playlist"
   cmd+=" --break-on-reject"
   cmd+=" --max-downloads '$MAX_DOWNLOADS'"
   cmd+=" --restrict-filenames"
   cmd+=" --get-url"
-  cmd+=" '$CHANNEL_URL'"
-
+  if [[ -n "${DATE_AFTER:-}" ]]; then
+    cmd+=" --dateafter '$DATE_AFTER'"
+  fi
   if [[ -n "$TITLE_KEYWORD" ]]; then
     cmd+=" --match-title '$TITLE_KEYWORD'"
   fi
+  cmd+=" '$CHANNEL_URL'"
 
   echo "$cmd"
 }
