@@ -169,7 +169,8 @@ download_or_skip_video() {
 
   # 2) Check if a file with this cache key already exists
   local cached_file
-  cached_file="$(ls -1A "${CACHE_FOLDER}"/*."[${cache_key}]."* 2>/dev/null | head -n1 || true)"
+
+  cached_file="$(ls -1A "${CACHE_FOLDER}"/*."[${cache_key}]."* 2>/dev/null | grep -Ev '(\.part|\.ytdl)$' | head -n1 || true)"
 
   if [[ -n "$cached_file" ]]; then
     log "Cache hit: Found existing file for cache key [${cache_key}] - $cached_file"
@@ -191,7 +192,7 @@ download_or_skip_video() {
   fi
 
   # 5) Check if the file with the cache key now exists in the cache
-  cached_file="$(ls -1A "${CACHE_FOLDER}"/*."[${cache_key}]."* 2>/dev/null | head -n1 || true)"
+  cached_file="$(ls -1A "${CACHE_FOLDER}"/*."[${cache_key}]."* 2>/dev/null | grep -Ev '(\.part|\.ytdl)$' | head -n1 || true)"
   if [[ -n "$cached_file" ]]; then
     log "Downloaded file: $cached_file"
     echo "$cached_file"
