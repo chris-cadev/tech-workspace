@@ -16,19 +16,18 @@
 	defaultBranch = main
 
 [alias]
-
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-
+  co = checkout
+  br = branch
+  ci = commit
+  st = status
   lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
   lg = lg1
   mylog = "!f() { git log --all --author=\"${1:-$(git config user.email)}\" --date-order; }; f"
   myl = mylog
   difns = diff --name-status
-  cb = rev-parse --abbrev-ref HEAD
+  current-branch = rev-parse --abbrev-ref HEAD
+  cb = current-branch
   lastcommit = "!f() { ref=${1:-HEAD}; git log --oneline -n 1 $ref | cat | awk '{print $1}'; }; f"
   lc = lastcommit
   ssh-to-https = "!f() { git remote get-url \"${1:-origin}\" | sed -e 's|git@\\(.*\\):|https://\\1/|' -e 's|\\.git$||'; }; f"
@@ -44,5 +43,12 @@
   rlc = reference-log-cat
   rebase-sync-daemon = "!f() { base_remote=${3:-origin}; base_branch=${2:-release}; target_branch=${1:-$(git cb)}; while true; do git fetch $base_remote $base_branch && git rebase $base_remote/$base_branch && git push $base_remote $target_branch -f || exit 0; sleep 60; done }; f"
   merge-sync-daemon = "!f() { base_remote=${3:-origin}; base_branch=${2:-release}; target_branch=${1:-$(git cb)}; while true; do git fetch $base_remote $base_branch && git merge $base_remote/$base_branch && git push $base_remote $target_branch || exit 0; sleep 60; done }; f"
+  pu = "!f(){ git push -u ${1:-origin} ${2:-$(git current-branch)}; }; f"
+  branch-sync = "!f() { git checkout \"$1\" -- $(git show \"${2:-HEAD}\" --pretty=\"format:\" --name-only | xargs); git reset -q; }; f"
+  s = status -sb
+  last = "!f(){ git log -1 ${1:-HEAD} --stat; }; f"
+  uncommit = "!f(){ git reset --soft HEAD~${1:-1}; }; f"
+  interactive-staging-for-untracked-files = "!f(){ git add \"$1\" -p && git add \"$1\" -N && git add \"$1\" -p; }; f"
+  isu = "interactive-staging-for-untracked-files"
 [includeIf "gitdir:~/projects/drata/"]
   path = ~/projects/tech-workspace/config/git/drata/.gitconfig

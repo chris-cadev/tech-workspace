@@ -1,12 +1,13 @@
 [project]
 name = "git-utils"
-version = "0.1.0"
-description = "Default template for PDM package"
+version = "0.1.1"
+description = "Utils to analyze date in git files"
 authors = [
     {name = "Christian Camacho", email = "chris.ca.dev@gmail.com"},
 ]
 dependencies = [
     "click>=8.1.7",
+    "tzlocal>=5.2",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
