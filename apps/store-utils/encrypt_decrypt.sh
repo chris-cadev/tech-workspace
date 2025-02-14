@@ -1,28 +1,35 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
+
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+}
 
 if [ $# -ne 1 ]; then
+    log "ERROR: Incorrect usage. Expected a folder or a .tar.gz.gpg file."
     echo "Usage: $0 <folder|file.tar.gz.gpg>"
     exit 1
 fi
 
+read -s -p "Enter GPG passphrase: " GPG_PASS
+export GPG_PASS
+
+echo ""
+
 input=$1
 
 if [[ -d $input ]]; then
-    echo "encrypting directory..."
-    # Input is a folder, perform encryption
+    log "Encrypting directory: $input"
     output="${input%/}.tar.gz.gpg"
-    tar -cvzf "$input" | gpg -c -o "$output"
-    echo "Encrypted to $output"
-elif [[ $input == *.tar.gz.gpg ]]; then
-    echo "decrypting..."
-    # Input is a *.tar.gz.gpg file, perform decryption
+    tar -cvzf - "$input" | gpg --batch --yes --passphrase "$GPG_PASS" -c -o "$output"
+    log "Encryption completed: $output"
+    elif [[ $input == *.tar.gz.gpg ]]; then
+    log "Decrypting file: $input"
     output="${input%.tar.gz.gpg}"
-    gpg --decrypt < "$input"
-    tar -xvzf -C "$(dirname "$output")"
-    echo "Decrypted to $output"
+    gpg --batch --yes --passphrase "$GPG_PASS" --decrypt "$input" | tar -xvzf - -C "$(dirname "$output")"
+    log "Decryption completed: $output"
 else
-    echo "Invalid input. Pass either a folder or a *.tar.gz.gpg file."
+    log "ERROR: Invalid input. Must be a directory or a .tar.gz.gpg file."
     exit 1
 fi

@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 CWD=$(dirname $(realpath "$0"))
 REPO_COPIES_DIR="$CWD/../.cache/repo-cloud-archive"
