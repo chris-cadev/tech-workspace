@@ -1,6 +1,6 @@
 [submodule "apps/ticket-management"]
 	path = apps/ticket-management
-	url = gh-ccamacho-d:ccamacho-d/ticket-management.git
+	url = gh-chris-cadev:chris-cadev/ticket-management.git
 [submodule "apps/knowledge-manager"]
 	path = apps/knowledge-manager
 	url = gh-chris-cadev:chris-cadev/notes.git
