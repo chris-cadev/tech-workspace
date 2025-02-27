@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 # it is necessary to install 1.4 first, because
